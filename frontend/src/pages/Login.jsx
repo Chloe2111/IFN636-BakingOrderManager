@@ -9,6 +9,24 @@ const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  const handleLogin = async (e) => {
+  e.preventDefault();
+  try {
+    const res = await axiosInstance.post('/api/auth/login', { email, password });
+    
+    // 1. Save to Context/LocalStorage
+    login(res.data); 
+
+    // 2. Redirect based on role
+    if (res.data.role === 'admin') {
+      navigate('/admin/dashboard');
+    } else {
+      navigate('/home');
+    }
+  } catch (err) {
+    alert("Login failed! Check your credentials.");
+  }
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();

@@ -19,6 +19,7 @@ import OrderTracking from './pages/OrderTracking';
 import Checkout from './pages/Checkout';
 
 // Admin Pages
+import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminProductList from './pages/AdminProductList';
 import AddProduct from './pages/AddProduct';
@@ -51,6 +52,7 @@ function App() {
 
         
         {/* Admin Flow */}
+        <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/profile" element={<AdminProfile />} />
 
