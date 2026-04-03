@@ -5,34 +5,43 @@ import axiosInstance from '../axiosConfig';
 import { FaLock, FaUserShield } from 'react-icons/fa';
 
 const AdminLogin = () => {
-  const [email, setEmail] = useState('');
+  const [email, setEmail]     = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const { login } = useAuth();
-  const navigate = useNavigate();
+  const [error, setError]     = useState('');
+  const [loading, setLoading] = useState(false);
+  const { login }             = useAuth();
+  const navigate              = useNavigate();
 
   const handleAdminLogin = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
     try {
       const res = await axiosInstance.post('/api/auth/login', { email, password });
-      
-      // Verify if the user is actually an admin before letting them in
-      if (res.data.user.role !== 'admin') {
-        setError("Access Denied: You do not have administrator privileges.");
+
+      // ✅ Fixed: backend returns flat object { _id, name, email, role, token }
+      // NOT res.data.user — it's directly res.data.role
+      if (res.data.role !== 'admin') {
+        setError('Access Denied: You do not have administrator privileges.');
         return;
       }
 
-      login(res.data.user, res.data.token);
+      // ✅ Fixed: pass the whole res.data object (includes token inside)
+      login(res.data);
       navigate('/admin/dashboard');
+
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed. Check your credentials.");
+      setError(err.response?.data?.message || 'Login failed. Check your credentials.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-slate-900 flex items-center justify-center p-6">
       <div className="max-w-md w-full bg-white rounded-[2.5rem] p-10 shadow-2xl">
+
+        {/* Header */}
         <div className="text-center mb-10">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-slate-100 text-slate-800 rounded-2xl mb-4">
             <FaUserShield size={32} />
@@ -41,28 +50,38 @@ const AdminLogin = () => {
           <p className="text-slate-400 text-sm mt-2">Secure access for bakery management</p>
         </div>
 
+        {/* Error message */}
         {error && (
           <div className="mb-6 p-4 bg-red-50 text-red-600 text-sm font-bold rounded-2xl border border-red-100 text-center">
             {error}
           </div>
         )}
 
+        {/* Login Form */}
         <form onSubmit={handleAdminLogin} className="space-y-4">
+
+          {/* Email */}
           <div>
-            <label className="text-xs font-black text-slate-400 uppercase ml-1">Admin Email</label>
-            <input 
-              type="email" 
+            <label className="text-xs font-black text-slate-400 uppercase ml-1">
+              Admin Email
+            </label>
+            <input
+              type="email"
               className="w-full mt-1 p-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-slate-800 transition"
-              placeholder="admin@sweetbakery.com"
+              placeholder="admin@sweetdelights.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
+
+          {/* ✅ Fixed label: "Secret Key" → "Password" */}
           <div>
-            <label className="text-xs font-black text-slate-400 uppercase ml-1">Secret Key</label>
-            <input 
-              type="password" 
+            <label className="text-xs font-black text-slate-400 uppercase ml-1">
+              Password
+            </label>
+            <input
+              type="password"
               className="w-full mt-1 p-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-slate-800 transition"
               placeholder="••••••••"
               value={password}
@@ -70,20 +89,33 @@ const AdminLogin = () => {
               required
             />
           </div>
-          <button 
-            type="submit" 
-            className="w-full bg-slate-800 text-white py-5 rounded-2xl font-black shadow-xl hover:bg-slate-900 transition flex items-center justify-center space-x-2"
+
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={loading}
+            className={`w-full py-5 rounded-2xl font-black shadow-xl transition flex items-center justify-center space-x-2
+              ${loading
+                ? 'bg-slate-400 cursor-not-allowed'
+                : 'bg-slate-800 text-white hover:bg-slate-900'}`}
           >
             <FaLock size={14} />
-            <span>Enter Dashboard</span>
+            <span>{loading ? 'Signing in...' : 'Enter Dashboard'}</span>
           </button>
         </form>
-        
-        <button 
+
+        {/* Hint for demo credentials */}
+        <div className="mt-6 p-4 bg-slate-50 rounded-2xl text-center">
+          <p className="text-slate-400 text-xs font-bold mb-1">Demo Admin Credentials</p>
+          <p className="text-slate-600 text-xs">julian@sweetdelights.com</p>
+          <p className="text-slate-600 text-xs">Admin@1</p>
+        </div>
+
+        <button
           onClick={() => navigate('/')}
-          className="w-full mt-6 text-slate-400 text-xs font-bold hover:text-slate-600 transition"
+          className="w-full mt-4 text-slate-400 text-xs font-bold hover:text-slate-600 transition"
         >
-          Back to Public Site
+          ← Back to Public Site
         </button>
       </div>
     </div>

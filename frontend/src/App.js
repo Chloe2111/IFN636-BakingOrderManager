@@ -10,6 +10,7 @@ import Register from './pages/Register';
 import Home from './pages/Home'; 
 import Products from './pages/Products';
 import ProductDetail from './pages/ProductDetail';
+import Orders from './pages/Orders'; 
 
 
 // Customer Pages
@@ -44,11 +45,12 @@ function App() {
         {/* Customer Flow */}
         <Route path="/home" element={<Home />} />
         <Route path="/products" element={<Products />} />
-        <Route path="/product/:id" element={<ProductDetail />} />
+        <Route path="/products/:id" element={<ProductDetail />} />
         <Route path="/profile" element={<CustomerDashboard />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/order-tracking/:id" element={<OrderTracking />} />
+        <Route path="/orders" element={<Orders />} />  
 
         
         {/* Admin Flow */}

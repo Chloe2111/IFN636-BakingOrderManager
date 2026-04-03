@@ -1,15 +1,31 @@
 const express = require('express');
 const router = express.Router();
 const {
-  registerUser, loginUser,
-  getUserProfile, updateUserProfile, deleteUserAccount
+  registerUser,
+  loginUser,
+  getUserProfile,
+  updateUserProfile,
+  deleteUserAccount,
+  getAllUsers,
+  getUserById,
+  updateUserById,
+  deleteUserById,
 } = require('../controllers/authController');
-const { protect } = require('../middleware/authMiddleware');
+const { protect, adminOnly } = require('../middleware/authMiddleware');
 
-router.post('/register', registerUser);
-router.post('/login', loginUser);
-router.get('/profile', protect, getUserProfile);
-router.put('/profile', protect, updateUserProfile);
+// Public
+router.post('/register',  registerUser);
+router.post('/login',     loginUser);
+
+// Customer (logged in)
+router.get('/profile',    protect, getUserProfile);
+router.put('/profile',    protect, updateUserProfile);
 router.delete('/profile', protect, deleteUserAccount);
+
+// Admin only
+router.get('/users',         protect, adminOnly, getAllUsers);
+router.get('/users/:id',     protect, adminOnly, getUserById);
+router.put('/users/:id',     protect, adminOnly, updateUserById);
+router.delete('/users/:id',  protect, adminOnly, deleteUserById);
 
 module.exports = router;

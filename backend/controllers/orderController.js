@@ -34,6 +34,17 @@ const getOrderById = async (req, res) => {
   }
 };
 
+const getMyOrders = async (req, res) => {
+  try {
+    const orders = await Order.find({ customer: req.user.id })
+      .populate('items.product', 'name image')
+      .sort({ createdAt: -1 });
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // @desc    Create new order
 // @route   POST /api/orders
 const createOrder = async (req, res) => {
@@ -92,6 +103,7 @@ const cancelOrder = async (req, res) => {
 module.exports = {
   getOrders,
   getOrderById,
+  getMyOrders, 
   createOrder,
   updateOrder,
   cancelOrder
