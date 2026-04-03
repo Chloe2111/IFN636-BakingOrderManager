@@ -22,9 +22,15 @@ jobs:
           node-version: '20' # Using a modern LTS version
 
       - name: Install dependencies
-        run: npm install
         working-directory: ./frontend
+        run: npm install
+
+      - name: Fix Permissions
+        working-directory: ./frontend
+        run: chmod +x node_modules/.bin/react-scripts
 
       - name: Run tests
-        run: npm test
         working-directory: ./frontend
+        run: npm test
+        env:
+          CI: true
