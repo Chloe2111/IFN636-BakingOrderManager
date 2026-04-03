@@ -2,106 +2,96 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import axiosInstance from '../axiosConfig';
-import { FaArrowLeft } from 'react-icons/fa'; // Install react-icons
+import { FaArrowLeft } from 'react-icons/fa';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
-  const { login } = useAuth();
+  const { login } = useAuth(); // Ensure your AuthContext 'login' function accepts (userData, token)
   const navigate = useNavigate();
-
-  const handleLogin = async (e) => {
-  e.preventDefault();
-  try {
-    const res = await axiosInstance.post('/api/auth/login', { email, password });
-    
-    // 1. Save to Context/LocalStorage
-    login(res.data); 
-
-    // 2. Redirect based on role
-    if (res.data.role === 'admin') {
-      navigate('/admin/dashboard');
-    } else {
-      navigate('/home');
-    }
-  } catch (err) {
-    alert("Login failed! Check your credentials.");
-  }
-};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const response = await axiosInstance.post('/api/auth/login', formData);
-      login(response.data);
       
-      // Check if user is admin or customer to direct them correctly
-      if (response.data.role === 'admin') {
-      navigate('/admin/dashboard');
-    } else {
-      navigate('/home');
+      // NOTE: Adjust 'response.data.user' based on your backend's actual response structure
+      const userData = response.data.user || response.data;
+      const token = response.data.token;
+
+      // 1. Save to Context/LocalStorage via your AuthProvider
+      login(userData, token);
+      
+      // 2. Role-based Redirection
+      if (userData.role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/home');
+      }
+    } catch (error) {
+      console.error("Login Error:", error);
+      const errorMsg = error.response?.data?.message || 'Login failed. Please check your credentials.';
+      alert(errorMsg);
     }
-  } catch (error) {
-    alert('Login failed. Please check your credentials.');
-  }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-      {/* Centered Card Layout */}
-      <div className="bg-white p-8 shadow-xl rounded-2xl w-full max-w-md relative">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4 font-sans">
+      <div className="bg-white p-8 shadow-xl rounded-[2rem] w-full max-w-md relative border border-gray-100">
         
-        {/* Backing Arrow */}
+        {/* Back Button */}
         <button 
           onClick={() => navigate('/')} 
-          className="absolute top-6 left-6 text-gray-600 hover:text-black"
+          className="absolute top-8 left-8 text-gray-400 hover:text-pink-600 transition-colors"
         >
           <FaArrowLeft size={20} />
         </button>
 
-        <h1 className="text-3xl font-bold mt-8 mb-2 text-center text-gray-800">Log In</h1>
-        <p className="text-center text-gray-500 mb-8">Enter your credentials to continue</p>
+        <div className="text-center mt-6">
+          <h1 className="text-3xl font-black text-slate-800 mb-2">Welcome Back</h1>
+          <p className="text-gray-500 mb-8">Please enter your details</p>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+            <label className="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Email Address</label>
             <input
               type="email"
               placeholder="name@example.com"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 outline-none transition"
+              className="w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-pink-500 outline-none transition"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <label className="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Password</label>
             <input
               type="password"
               placeholder="••••••••"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 outline-none transition"
+              className="w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-pink-500 outline-none transition"
               required
             />
           </div>
 
           <div className="flex justify-end">
-            <Link to="/forgot-password" size="sm" className="text-pink-600 hover:underline text-sm font-medium">
+            <Link to="/forgot-password" size="sm" className="text-pink-600 hover:text-pink-700 text-sm font-bold">
               Forgot password?
             </Link>
           </div>
 
           <button 
             type="submit" 
-            className="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 rounded-lg shadow-lg transform transition active:scale-95"
+            className="w-full bg-pink-600 hover:bg-pink-700 text-white font-black py-4 rounded-2xl shadow-lg shadow-pink-100 transform transition active:scale-95"
           >
             Log In
           </button>
         </form>
 
-        <p className="text-center mt-6 text-gray-600 text-sm">
-          Don't have an account? <Link to="/register" className="text-pink-600 font-bold">Create new account</Link>
+        <p className="text-center mt-8 text-gray-500 text-sm">
+          Don't have an account? <Link to="/register" className="text-pink-600 font-black hover:underline">Sign up for free</Link>
         </p>
       </div>
     </div>
